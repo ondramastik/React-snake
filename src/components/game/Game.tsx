@@ -1,4 +1,4 @@
-import React, {FC, useCallback, useContext, useEffect, useState} from 'react';
+import React, {FC, useContext, useEffect, useState} from 'react';
 import GameField from "../../domain/GameField";
 import ISnakeService from "../../domain/service/SnakeService";
 import {SnakeServiceContext} from "../../context/SnakeServiceContext";
@@ -13,6 +13,7 @@ const Game: FC<Props> = ({gameSpeed}) => {
   const [gameField, setGameField] = useState<GameField | undefined>()
   const [running, setRunning] = useState(false)
   const [error, setError] = useState(false)
+  const [errorCause, setErrorCause] = useState()
   const [tick, setTick] = useState(0)
   const [direction, setDirection] = useState(Direction.Down)
 
@@ -41,13 +42,16 @@ const Game: FC<Props> = ({gameSpeed}) => {
   }, [error, running, direction])
 
   useEffect(() => {
-    if(running) {
+    if (running) {
+      console.log("tick " + tick)
       setTimeout(() => setTick(tick + 1), gameSpeed)
 
       snakeService
         .tick(direction)
         .then(gameField => setGameField(gameField))
         .catch(reason => {
+          console.log(reason)
+          setErrorCause(reason.message)
           setRunning(false)
           setError(true)
         })
@@ -58,6 +62,7 @@ const Game: FC<Props> = ({gameSpeed}) => {
   return <div id="game">
     <h1>Směr: {direction}</h1>
     <h1>Tick: {tick}</h1>
+    {errorCause && <h1>Error: {errorCause}</h1>}
     {gameField && <GameFieldPresenter gameField={gameField}/>}
   </div>
 }

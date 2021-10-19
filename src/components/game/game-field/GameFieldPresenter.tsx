@@ -8,15 +8,22 @@ interface Props {
   gameField: GameField
 }
 
-const isSnakeTile = (gameField: GameField, pos: Coordinates) =>
-  gameField.snakeTiles && gameField.snakeTiles.filter(location => location.X === pos.X && location.Y === pos.Y).length > 0
+const resolveTile = (gameField: GameField, pos: Coordinates) => {
+  if(gameField.snakeTiles.filter(location => location.X === pos.X && location.Y === pos.Y).length > 0) {
+    return TileType.Snake
+  } else if(gameField.foodLocation.X === pos.X && gameField.foodLocation.Y === pos.Y) {
+    return TileType.Food
+  }
+
+  return gameField.tiles[pos.X][pos.Y]
+}
 
 const GameFieldPresenter: FC<Props> = ({gameField}) => {
   return <div id="game-field-presenter">
     {gameField.tiles.map(
       (row, x) => <React.Fragment>
         {row.map((tile, y) => <div
-          className={`tile tile-${isSnakeTile(gameField, {X: x, Y: y}) ? TileType.Snake : tile}`} key={`${x}-${y}`}/>)}
+          className={`tile tile-${resolveTile(gameField, {X: x, Y: y})}`} key={`${x}-${y}`}/>)}
         <div/>
       </React.Fragment>)}
   </div>

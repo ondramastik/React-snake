@@ -10,15 +10,15 @@ export default class SnakeService implements ISnakeService {
 
   lastDirection: Direction
 
-  snakeTiles: Coordinates[]
-
-
-  constructor(gameField: GameField, playerPosX: number, playerPosY: number, lastDirection: Direction) {
-    this.gameField = gameField;
-    this.snakeTiles = [{
-      X: playerPosX,
-      Y: playerPosY
-    }]
+  constructor(tiles: TileType[][], playerPosX: number, playerPosY: number, lastDirection: Direction) {
+    this.gameField = {
+      tiles: tiles,
+      snakeTiles: [{
+        X: playerPosX,
+        Y: playerPosY
+      }],
+      foodLocation: SnakeService.generateFoodLocation(tiles)
+    }
     this.lastDirection = lastDirection
   }
 
@@ -33,7 +33,7 @@ export default class SnakeService implements ISnakeService {
   }
 
   private handleTick(direction: Direction): GameField {
-    const currentHeadPos = this.snakeTiles[this.snakeTiles.length - 1]
+    const currentHeadPos = this.gameField.snakeTiles[this.gameField.snakeTiles.length - 1]
     const newPos = {
       X: currentHeadPos.X,
       Y: currentHeadPos.Y
@@ -55,17 +55,48 @@ export default class SnakeService implements ISnakeService {
     }
 
     this.validate(newPos)
-    console.log("next pos: %o", newPos)
 
-    this.snakeTiles.push(newPos)
-    console.log("pushed: %o", [...this.snakeTiles])
-    this.snakeTiles.shift()
-    console.log("shifted: %o", [...this.snakeTiles])
+    this.gameField.snakeTiles.push(newPos)
+
+    if (this.gameField.foodLocation.X === newPos.X && this.gameField.foodLocation.Y === newPos.Y) {
+      this.gameField.foodLocation = SnakeService.generateFoodLocation(this.gameField.tiles)
+    } else this.gameField.snakeTiles.shift()
+
+
+    return this.gameField
+  }
+
+  private static generateFoodLocation(tiles: TileType[][]): Coordinates {
+    let x: number = -1
+
+    while (true) {
+      let tmp = SnakeService.randomIndex(tiles.length)
+      console.log(tmp)
+      if (tiles[tmp] !== undefined) {
+        x = tmp
+        break;
+      }
+    }
+
+    let y: number = -1
+
+    while (true) {
+      let tmp = SnakeService.randomIndex(tiles[x].length)
+      console.log(tmp)
+      if (tiles[x][tmp] !== undefined && tiles[x][tmp] === TileType.Floor) {
+        y = tmp
+        break;
+      }
+    }
 
     return {
-      tiles: this.gameField.tiles,
-      snakeTiles: this.snakeTiles
+      X: x,
+      Y: y
     }
+  }
+
+  private static randomIndex(max: number): number {
+    return Math.floor((Math.random() * max))
   }
 
   private validate(newPos: Coordinates): void {
