@@ -2,28 +2,23 @@ import ISnakeService from "../domain/service/SnakeService";
 import GameField from "../domain/GameField";
 import {Direction} from "../domain/Direction";
 import {TileType} from "../domain/TileType";
+import Coordinates from "../domain/Coordinates";
 
 export default class SnakeService implements ISnakeService {
 
   gameField: GameField
 
-  headPosX: number
-
-  headPosY: number
-
-  tailPosX: number
-
-  tailPosY: number
-
   lastDirection: Direction
+
+  snakeTiles: Coordinates[]
 
 
   constructor(gameField: GameField, playerPosX: number, playerPosY: number, lastDirection: Direction) {
     this.gameField = gameField;
-    this.headPosX = playerPosX;
-    this.headPosY = playerPosY;
-    this.tailPosX = this.headPosX
-    this.tailPosY = this.headPosY
+    this.snakeTiles = [{
+      X: playerPosX,
+      Y: playerPosY
+    }]
     this.lastDirection = lastDirection
   }
 
@@ -38,30 +33,48 @@ export default class SnakeService implements ISnakeService {
   }
 
   private handleTick(direction: Direction): GameField {
-    let newPosX = this.headPosX
-    let newPosY = this.headPosY
+    const currentHeadPos = this.snakeTiles[this.snakeTiles.length - 1]
+    const newPos = {
+      X: currentHeadPos.X,
+      Y: currentHeadPos.Y
+    }
 
     switch (direction) {
       case Direction.Top:
-        newPosX -= 1
+        newPos.X -= 1
         break;
       case Direction.Down:
-        newPosX += 1
+        newPos.X += 1
         break;
       case Direction.Left:
-        newPosY -= 1
+        newPos.Y -= 1
         break;
       case Direction.Right:
-        newPosY += 1
+        newPos.Y += 1
         break;
     }
 
-    this.headPosX = newPosX
-    this.headPosY = newPosY
+    this.validate(newPos)
+    console.log("next pos: %o", newPos)
 
-    this.gameField.tiles[newPosX][newPosY] = TileType.Snake
+    this.snakeTiles.push(newPos)
+    console.log("pushed: %o", [...this.snakeTiles])
+    this.snakeTiles.shift()
+    console.log("shifted: %o", [...this.snakeTiles])
 
-    return this.gameField
+    return {
+      tiles: this.gameField.tiles,
+      snakeTiles: this.snakeTiles
+    }
+  }
+
+  private validate(newPos: Coordinates): void {
+    if (!this.gameField.tiles[newPos.X][newPos.Y]) {
+      throw Error("Player out of field")
+    }
+    if (![TileType.Floor, TileType.Food].includes(this.gameField.tiles[newPos.X][newPos.Y])) {
+      throw Error("Player crashed")
+    }
   }
 
 

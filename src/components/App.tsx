@@ -35,7 +35,7 @@ function App() {
       [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Wall],
       [TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall],
     ]
-  }, 0, 0, Direction.Right))
+  }, 1, 1, Direction.Down))
 
   return (
     <div className="App">

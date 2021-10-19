@@ -1,4 +1,4 @@
-import React, {FC, useContext, useEffect, useState} from 'react';
+import React, {FC, useCallback, useContext, useEffect, useState} from 'react';
 import GameField from "../../domain/GameField";
 import ISnakeService from "../../domain/service/SnakeService";
 import {SnakeServiceContext} from "../../context/SnakeServiceContext";
@@ -12,13 +12,14 @@ interface Props {
 const Game: FC<Props> = ({gameSpeed}) => {
   const [gameField, setGameField] = useState<GameField | undefined>()
   const [running, setRunning] = useState(false)
+  const [error, setError] = useState(false)
   const [tick, setTick] = useState(0)
-  const [direction, setDirection] = useState(Direction.Right)
+  const [direction, setDirection] = useState(Direction.Down)
 
   const snakeService: ISnakeService = useContext(SnakeServiceContext)
 
   useEffect(() => {
-    if (!running) {
+    if (!error && !running) {
       document.addEventListener('keydown', function (e) {
         switch (e.code) {
           case "ArrowLeft":
@@ -35,22 +36,23 @@ const Game: FC<Props> = ({gameSpeed}) => {
             break;
         }
       })
-
       setRunning(true)
     }
-  }, [running, direction])
+  }, [error, running, direction])
 
   useEffect(() => {
-    if (running) {
-      setTimeout(() => {
-        snakeService
-          .tick(direction)
-          .then(gameField => setGameField(gameField))
-          .catch(reason => alert("neco se stalo" + reason))
-          .finally(() => setTick(tick + 1))
-      }, gameSpeed)
+    if(running) {
+      setTimeout(() => setTick(tick + 1), gameSpeed)
+
+      snakeService
+        .tick(direction)
+        .then(gameField => setGameField(gameField))
+        .catch(reason => {
+          setRunning(false)
+          setError(true)
+        })
     }
-  }, [direction, gameField, gameSpeed, running, snakeService, tick])
+  }, [direction, gameSpeed, running, snakeService, tick])
 
 
   return <div id="game">
