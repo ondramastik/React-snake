@@ -1,9 +1,10 @@
-import React, {FC, useCallback, useContext, useEffect, useState} from 'react';
+import React, {FC, useContext, useEffect, useState} from 'react';
 import GameView from "../../domain/GameView";
 import ISnakeService from "../../domain/service/SnakeService";
 import {SnakeServiceContext} from "../../context/SnakeServiceContext";
-import GameFieldPresenter from "./game-field/GameFieldPresenter";
 import {Direction} from "../../domain/Direction";
+import GamePresenter from "./GamePresenter";
+import GameControls from "./game-controls/GameControls";
 
 interface Props {
   gameSpeed: number
@@ -12,14 +13,10 @@ interface Props {
 const Game: FC<Props> = ({gameSpeed}) => {
   const [gameView, setGameView] = useState<GameView | undefined>()
 
-  const [running, setRunning] = useState(false)
-
-  const [error, setError] = useState(false)
-  const [errorCause, setErrorCause] = useState()
+  const [running, setRunning] = useState(true)
 
   const [tick, setTick] = useState(0)
-  const [currentDirection, setCurrentDirection] = useState<Direction>()
-  const [nextDirection, setNextDirection] = useState<Direction>()
+  const [direction, setDirection] = useState<Direction>()
 
   const snakeService: ISnakeService = useContext(SnakeServiceContext)
 
@@ -28,93 +25,30 @@ const Game: FC<Props> = ({gameSpeed}) => {
       .then(gameView => setGameView(gameView))
 
     setTick(0)
-    setError(false)
-    setErrorCause(undefined)
     setRunning(true)
-    setNextDirection(undefined)
-    setCurrentDirection(undefined)
+    setDirection(undefined)
   }
-
-  const isValidDirection = useCallback((prevDirection?: Direction, newDirection?: Direction) => {
-    switch (newDirection) {
-      case Direction.Left:
-        if(prevDirection === Direction.Right)
-          return false
-        break
-      case Direction.Top:
-        if(prevDirection === Direction.Down)
-          return false
-        break
-      case Direction.Right:
-        if(prevDirection === Direction.Left)
-          return false
-        break
-      case Direction.Down:
-        if(prevDirection === Direction.Top)
-          return false
-        break
-    }
-    return true
-  }, [])
-
-  useEffect(() => {
-    if (!error && !running) {
-      document.addEventListener('keydown', function (e) {
-        let newDirection: Direction | undefined = undefined
-        switch (e.code) {
-          case "ArrowLeft":
-            newDirection = Direction.Left
-            break;
-          case "ArrowUp":
-            newDirection = Direction.Top
-            break;
-          case "ArrowRight":
-            newDirection = Direction.Right
-            break;
-          case "ArrowDown":
-            newDirection = Direction.Down
-            break;
-        }
-
-        if(newDirection !== undefined) {
-          setNextDirection(newDirection)
-        }
-      })
-
-      setRunning(true)
-    }
-  }, [currentDirection, error, isValidDirection, running])
 
   useEffect(() => {
     if (running) {
       setTimeout(() => setTick(tick + 1), gameSpeed)
 
       snakeService
-        .tick(nextDirection)
+        .tick(direction)
         .then(gameView => setGameView(gameView))
-        .catch(reason => {
-          setErrorCause(reason.message)
+        .catch(() => {
           setRunning(false)
-          setError(true)
         })
-
-      setCurrentDirection(nextDirection)
     }
   }, [gameSpeed, running, snakeService, tick])
 
-  useEffect(() => {
-    if(!isValidDirection(currentDirection, nextDirection)) {
-      setNextDirection(currentDirection)
-    }
-  }, [currentDirection, isValidDirection, nextDirection])
-
 
   return <div id="game">
-    <h1>Směr: {currentDirection}</h1>
-    <h1>Tick: {tick}</h1>
-    {errorCause && <h1>Error: {errorCause}</h1>}
-    {gameView && <GameFieldPresenter gameField={gameView}/>}
-    <button onClick={() => restart()} disabled={running}>Restart</button>
+    <GameControls restart={() => restart()}
+                  onDirectionChange={direction => setDirection(direction)}
+                  lastDirection={direction}
+                  disabled={running}/>
+    {gameView && <GamePresenter gameView={gameView}/>}
   </div>
 }
 

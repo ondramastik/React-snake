@@ -5,7 +5,7 @@ import Coordinates from "../../../domain/Coordinates";
 import {TileType} from "../../../domain/TileType";
 
 interface Props {
-  gameField: GameView
+  gameView: GameView
 }
 
 const resolveTile = (gameField: GameView, pos: Coordinates) => {
@@ -18,12 +18,12 @@ const resolveTile = (gameField: GameView, pos: Coordinates) => {
   return gameField.tiles[pos.X][pos.Y]
 }
 
-const GameFieldPresenter: FC<Props> = ({gameField}) => {
+const GameFieldPresenter: FC<Props> = ({gameView}) => {
   return <div id="game-field-presenter">
-    {gameField.tiles.map(
+    {gameView.tiles.map(
       (row, x) => <React.Fragment>
         {row.map((tile, y) => <div
-          className={`tile tile-${resolveTile(gameField, {X: x, Y: y})}`} key={`${x}-${y}`}/>)}
+          className={`tile tile-${resolveTile(gameView, {X: x, Y: y})}`} key={`${x}-${y}`}/>)}
         <div/>
       </React.Fragment>)}
   </div>

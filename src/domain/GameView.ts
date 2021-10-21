@@ -5,4 +5,5 @@ export default interface GameView {
   tiles: TileType[][]
   snakeTiles: Coordinates[]
   foodLocation: Coordinates
+  errors: Error[]
 }
