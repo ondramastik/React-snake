@@ -1,43 +1,51 @@
 import ISnakeService from "../domain/service/SnakeService";
-import GameField from "../domain/GameField";
+import GameView from "../domain/GameView";
 import {Direction} from "../domain/Direction";
 import {TileType} from "../domain/TileType";
 import Coordinates from "../domain/Coordinates";
+import GameMap from "../domain/GameMap";
 
 export default class SnakeService implements ISnakeService {
 
-  gameField: GameField
+  private map: GameMap
 
-  lastDirection: Direction
+  private foodLocation: Coordinates
 
-  constructor(tiles: TileType[][], playerPosX: number, playerPosY: number, lastDirection: Direction) {
-    this.gameField = {
-      tiles: tiles,
-      snakeTiles: [{
-        X: playerPosX,
-        Y: playerPosY
-      }],
-      foodLocation: SnakeService.generateFoodLocation(tiles)
-    }
+  private snakeTiles: Coordinates[]
+
+  private lastDirection: Direction
+
+  constructor(map: GameMap, lastDirection: Direction) {
+    this.map = map
+    this.foodLocation = SnakeService.generateFoodLocation(map.tiles)
+    this.snakeTiles = [{...map.startLocation}]
     this.lastDirection = lastDirection
   }
 
-  tick(direction: Direction): Promise<GameField> {
-    return new Promise<GameField>((resolve, reject) => {
+  tick(direction?: Direction): Promise<GameView> {
+    return new Promise<GameView>((resolve, reject) => {
       try {
-        resolve(this.handleTick(direction))
+        if(direction !== undefined) {
+          resolve(this.handleTick(direction))
+        } else {
+          resolve(this.getGameView())
+        }
       } catch (e) {
         reject(e)
       }
     })
   }
 
-  private handleTick(direction: Direction): GameField {
-    const currentHeadPos = this.gameField.snakeTiles[this.gameField.snakeTiles.length - 1]
-    const newPos = {
-      X: currentHeadPos.X,
-      Y: currentHeadPos.Y
-    }
+  reset(): Promise<GameView> {
+    this.snakeTiles = [{...this.map.startLocation}]
+    this.foodLocation = SnakeService.generateFoodLocation(this.map.tiles)
+
+    return Promise.resolve(this.getGameView())
+  }
+
+  private handleTick(direction: Direction): GameView {
+    const currentHeadPos = this.snakeTiles[this.snakeTiles.length - 1]
+    const newPos = {...currentHeadPos}
 
     switch (direction) {
       case Direction.Top:
@@ -56,14 +64,34 @@ export default class SnakeService implements ISnakeService {
 
     this.validate(newPos)
 
-    this.gameField.snakeTiles.push(newPos)
+    this.snakeTiles.push(newPos)
 
-    if (this.gameField.foodLocation.X === newPos.X && this.gameField.foodLocation.Y === newPos.Y) {
-      this.gameField.foodLocation = SnakeService.generateFoodLocation(this.gameField.tiles)
-    } else this.gameField.snakeTiles.shift()
+    if (this.foodLocation.X === newPos.X && this.foodLocation.Y === newPos.Y) {
+      this.foodLocation = SnakeService.generateFoodLocation(this.map.tiles)
+    } else this.snakeTiles.shift()
 
 
-    return this.gameField
+    return this.getGameView()
+  }
+
+  private getGameView(): GameView {
+    return {
+      tiles: this.map.tiles,
+      snakeTiles: this.snakeTiles,
+      foodLocation: this.foodLocation
+    }
+  }
+
+  private validate(newPos: Coordinates): void {
+    if (!this.map.tiles[newPos.X][newPos.Y]) {
+      throw Error("Player out of field")
+    }
+    if (![TileType.Floor, TileType.Food].includes(this.map.tiles[newPos.X][newPos.Y])) {
+      throw Error("Player crashed")
+    }
+    if (this.snakeTiles.filter(snakeLoc => snakeLoc.X === newPos.X && snakeLoc.Y === newPos.Y).length > 0) {
+      throw Error("The player ate himself")
+    }
   }
 
   private static generateFoodLocation(tiles: TileType[][]): Coordinates {
@@ -71,8 +99,8 @@ export default class SnakeService implements ISnakeService {
 
     while (true) {
       let tmp = SnakeService.randomIndex(tiles.length)
-      console.log(tmp)
-      if (tiles[tmp] !== undefined) {
+      console.log(tiles[tmp])
+      if (tiles[tmp] !== undefined && tiles[tmp].includes(TileType.Floor)) {
         x = tmp
         break;
       }
@@ -82,7 +110,7 @@ export default class SnakeService implements ISnakeService {
 
     while (true) {
       let tmp = SnakeService.randomIndex(tiles[x].length)
-      console.log(tmp)
+      console.log(tiles[x][tmp])
       if (tiles[x][tmp] !== undefined && tiles[x][tmp] === TileType.Floor) {
         y = tmp
         break;
@@ -97,15 +125,6 @@ export default class SnakeService implements ISnakeService {
 
   private static randomIndex(max: number): number {
     return Math.floor((Math.random() * max))
-  }
-
-  private validate(newPos: Coordinates): void {
-    if (!this.gameField.tiles[newPos.X][newPos.Y]) {
-      throw Error("Player out of field")
-    }
-    if (![TileType.Floor, TileType.Food].includes(this.gameField.tiles[newPos.X][newPos.Y])) {
-      throw Error("Player crashed")
-    }
   }
 
 

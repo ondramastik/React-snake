@@ -1,5 +1,5 @@
-import React, {FC, useContext, useEffect, useState} from 'react';
-import GameField from "../../domain/GameField";
+import React, {FC, useCallback, useContext, useEffect, useState} from 'react';
+import GameView from "../../domain/GameView";
 import ISnakeService from "../../domain/service/SnakeService";
 import {SnakeServiceContext} from "../../context/SnakeServiceContext";
 import GameFieldPresenter from "./game-field/GameFieldPresenter";
@@ -10,60 +10,111 @@ interface Props {
 }
 
 const Game: FC<Props> = ({gameSpeed}) => {
-  const [gameField, setGameField] = useState<GameField | undefined>()
+  const [gameView, setGameView] = useState<GameView | undefined>()
+
   const [running, setRunning] = useState(false)
+
   const [error, setError] = useState(false)
   const [errorCause, setErrorCause] = useState()
+
   const [tick, setTick] = useState(0)
-  const [direction, setDirection] = useState(Direction.Down)
+  const [currentDirection, setCurrentDirection] = useState<Direction>()
+  const [nextDirection, setNextDirection] = useState<Direction>()
 
   const snakeService: ISnakeService = useContext(SnakeServiceContext)
+
+  const restart = () => {
+    snakeService.reset()
+      .then(gameView => setGameView(gameView))
+
+    setTick(0)
+    setError(false)
+    setErrorCause(undefined)
+    setRunning(true)
+    setNextDirection(undefined)
+    setCurrentDirection(undefined)
+  }
+
+  const isValidDirection = useCallback((prevDirection?: Direction, newDirection?: Direction) => {
+    switch (newDirection) {
+      case Direction.Left:
+        if(prevDirection === Direction.Right)
+          return false
+        break
+      case Direction.Top:
+        if(prevDirection === Direction.Down)
+          return false
+        break
+      case Direction.Right:
+        if(prevDirection === Direction.Left)
+          return false
+        break
+      case Direction.Down:
+        if(prevDirection === Direction.Top)
+          return false
+        break
+    }
+    return true
+  }, [])
 
   useEffect(() => {
     if (!error && !running) {
       document.addEventListener('keydown', function (e) {
+        let newDirection: Direction | undefined = undefined
         switch (e.code) {
           case "ArrowLeft":
-            setDirection(Direction.Left)
+            newDirection = Direction.Left
             break;
           case "ArrowUp":
-            setDirection(Direction.Top)
+            newDirection = Direction.Top
             break;
           case "ArrowRight":
-            setDirection(Direction.Right)
+            newDirection = Direction.Right
             break;
           case "ArrowDown":
-            setDirection(Direction.Down)
+            newDirection = Direction.Down
             break;
         }
+
+        if(newDirection !== undefined) {
+          setNextDirection(newDirection)
+        }
       })
+
       setRunning(true)
     }
-  }, [error, running, direction])
+  }, [currentDirection, error, isValidDirection, running])
 
   useEffect(() => {
     if (running) {
-      console.log("tick " + tick)
       setTimeout(() => setTick(tick + 1), gameSpeed)
 
       snakeService
-        .tick(direction)
-        .then(gameField => setGameField(gameField))
+        .tick(nextDirection)
+        .then(gameView => setGameView(gameView))
         .catch(reason => {
-          console.log(reason)
           setErrorCause(reason.message)
           setRunning(false)
           setError(true)
         })
+
+      setCurrentDirection(nextDirection)
     }
-  }, [direction, gameSpeed, running, snakeService, tick])
+  }, [gameSpeed, running, snakeService, tick])
+
+  useEffect(() => {
+    if(!isValidDirection(currentDirection, nextDirection)) {
+      setNextDirection(currentDirection)
+    }
+  }, [currentDirection, isValidDirection, nextDirection])
 
 
   return <div id="game">
-    <h1>Směr: {direction}</h1>
+    <h1>Směr: {currentDirection}</h1>
     <h1>Tick: {tick}</h1>
     {errorCause && <h1>Error: {errorCause}</h1>}
-    {gameField && <GameFieldPresenter gameField={gameField}/>}
+    {gameView && <GameFieldPresenter gameField={gameView}/>}
+    <button onClick={() => restart()} disabled={running}>Restart</button>
   </div>
 }
 

@@ -1,8 +1,7 @@
 import {TileType} from "./TileType";
 import Coordinates from "./Coordinates";
 
-export default interface GameField {
+export default interface GameMap {
   tiles: TileType[][]
-  snakeTiles: Coordinates[]
-  foodLocation: Coordinates
+  startLocation: Coordinates
 }

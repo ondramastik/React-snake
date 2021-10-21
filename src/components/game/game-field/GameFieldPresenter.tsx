@@ -1,14 +1,14 @@
 import React, {FC} from 'react';
 import './GameFieldPresenter.css';
-import GameField from "../../../domain/GameField";
+import GameView from "../../../domain/GameView";
 import Coordinates from "../../../domain/Coordinates";
 import {TileType} from "../../../domain/TileType";
 
 interface Props {
-  gameField: GameField
+  gameField: GameView
 }
 
-const resolveTile = (gameField: GameField, pos: Coordinates) => {
+const resolveTile = (gameField: GameView, pos: Coordinates) => {
   if(gameField.snakeTiles.filter(location => location.X === pos.X && location.Y === pos.Y).length > 0) {
     return TileType.Snake
   } else if(gameField.foodLocation.X === pos.X && gameField.foodLocation.Y === pos.Y) {
