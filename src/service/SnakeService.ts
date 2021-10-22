@@ -101,7 +101,7 @@ export default class SnakeService implements ISnakeService {
       let tmp = SnakeService.randomIndex(tiles.length)
       if (tiles[tmp] !== undefined && tiles[tmp].includes(TileType.Floor)) {
         x = tmp
-        break;
+        break
       }
     }
 
@@ -109,16 +109,18 @@ export default class SnakeService implements ISnakeService {
 
     while (true) {
       let tmp = SnakeService.randomIndex(tiles[x].length)
-      if (tiles[x][tmp] !== undefined && snakeTiles.filter(pos => pos.X === x && pos.Y === tmp).length < 1 && tiles[x][tmp] === TileType.Floor) {
+      if (tiles[x][tmp] !== undefined && tiles[x][tmp] === TileType.Floor) {
         y = tmp
-        break;
+        break
       }
     }
 
-    return {
-      X: x,
-      Y: y
-    }
+    if(snakeTiles.filter(pos => pos.X === x && pos.Y === y).length < 1) {
+      return {
+        X: x,
+        Y: y
+      }
+    } else return SnakeService.generateFoodLocation(tiles, snakeTiles)
   }
 
   private static randomIndex(max: number): number {
