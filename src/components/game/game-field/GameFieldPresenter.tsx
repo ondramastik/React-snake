@@ -3,10 +3,8 @@ import GameView from "../../../domain/GameView";
 import Coordinates from "../../../domain/Coordinates";
 import {TileType} from "../../../domain/TileType";
 import styled from "styled-components";
+import GameMap from "../../../domain/GameMap";
 
-interface Props {
-  gameView: GameView
-}
 
 const Container = styled.div`
   width: 100%;
@@ -34,38 +32,43 @@ const FoodTile = styled(Tile)`
   background-color: #4dbc3c;
 `
 
-const resolveTile = (gameField: GameView, pos: Coordinates) => {
+interface Props {
+  map: GameMap
+  gameView: GameView
+}
+
+const resolveTile = (map: GameMap, gameField: GameView, pos: Coordinates) => {
   if (gameField.snakeTiles.filter(location => location.X === pos.X && location.Y === pos.Y).length > 0) {
     return TileType.Snake
   } else if (gameField.foodLocation.X === pos.X && gameField.foodLocation.Y === pos.Y) {
     return TileType.Food
   }
 
-  return gameField.tiles[pos.X][pos.Y]
+  return map.tiles[pos.X][pos.Y]
 }
 
-const GameFieldPresenter: FC<Props> = ({gameView}) => {
-  const getTile = (gameView: GameView, pos: Coordinates) => {
-    const resolvedTile = resolveTile(gameView, pos)
+const getTile = (map: GameMap, gameView: GameView, pos: Coordinates, key: string) => {
+  const resolvedTile = resolveTile(map, gameView, pos)
 
-    switch (resolvedTile) {
-      case TileType.Wall:
-        return <WallTile/>
-      case TileType.Snake:
-        return <SnakeTile/>
-      case TileType.Food:
-        return <FoodTile/>
-    }
-
-    return <FloorTile/>
+  switch (resolvedTile) {
+    case TileType.Wall:
+      return <WallTile key={key}/>
+    case TileType.Snake:
+      return <SnakeTile key={key}/>
+    case TileType.Food:
+      return <FoodTile key={key}/>
   }
 
-  return <Container id="game-field-presenter">
-    {gameView.tiles.map(
-      (row, x) => <div>
-        {row.map((tile, y) => getTile(gameView, {X: x, Y: y}))}
+  return <FloorTile key={key}/>
+}
+
+const GameFieldPresenter: FC<Props> = ({map, gameView}) =>
+  <Container id="game-field-presenter">
+    {map.tiles.map(
+      (row, x) => <div key={x}>
+        {row.map((tile, y) => getTile(map, gameView, {X: x, Y: y}, `${x}-${y}`))}
       </div>)}
   </Container>
-}
+
 
 export default GameFieldPresenter

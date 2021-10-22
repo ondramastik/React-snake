@@ -7,49 +7,38 @@ import GameMap from "../domain/GameMap";
 
 export default class SnakeService implements ISnakeService {
 
-  private map: GameMap
+  private foodLocation: Coordinates | undefined
 
-  private foodLocation: Coordinates
+  private snakeTiles: Coordinates[] = []
 
-  private snakeTiles: Coordinates[]
+  private errors: Error[] = []
 
-  private lastDirection: Direction
+  private initialized: boolean = false
 
-  private errors: Error[]
+  tick(direction: Direction, map: GameMap): Promise<GameView> {
+    if (!this.initialized) {
+      this.reset(map)
+        .then(() => this.initialized = true)
+    }
 
-  constructor(map: GameMap, lastDirection: Direction) {
-    this.map = map
-    this.snakeTiles = [{...map.startLocation}]
-    this.foodLocation = SnakeService.generateFoodLocation(map.tiles, this.snakeTiles)
-    this.lastDirection = lastDirection
-    this.errors = []
-  }
-
-  tick(direction?: Direction): Promise<GameView> {
     return new Promise<GameView>((resolve, reject) => {
-      if(this.errors?.length > 0) reject(this.errors)
+      const gameView = this.handleTick(direction, map)
 
-      if (direction !== undefined) {
-        const gameView = this.handleTick(direction)
-
-        if(gameView.errors?.length < 1) {
-          resolve(gameView)
-        } else reject(gameView.errors)
-      } else {
-        resolve(this.getGameView())
-      }
+      if (gameView.errors?.length < 1) {
+        resolve(gameView)
+      } else reject(gameView.errors)
     })
   }
 
-  reset(): Promise<GameView> {
-    this.snakeTiles = [{...this.map.startLocation}]
-    this.foodLocation = SnakeService.generateFoodLocation(this.map.tiles, this.snakeTiles)
+  reset(map: GameMap): Promise<GameView> {
+    this.snakeTiles = [{...map.startLocation}]
+    this.foodLocation = SnakeService.generateFoodLocation(map.tiles, this.snakeTiles)
     this.errors = []
 
     return Promise.resolve(this.getGameView())
   }
 
-  private handleTick(direction: Direction): GameView {
+  private handleTick(direction: Direction, map: GameMap): GameView {
     const currentHeadPos = this.snakeTiles[this.snakeTiles.length - 1]
     const newPos = {...currentHeadPos}
 
@@ -68,36 +57,34 @@ export default class SnakeService implements ISnakeService {
         break;
     }
 
-    this.errors.push(...this.validate(newPos))
+    this.errors.push(...this.validate(newPos, map))
 
-    if(this.errors.length < 1) {
+    if (this.errors.length < 1 && this.foodLocation) {
       this.snakeTiles.push(newPos)
 
       if (this.foodLocation.X === newPos.X && this.foodLocation.Y === newPos.Y) {
-        this.foodLocation = SnakeService.generateFoodLocation(this.map.tiles, this.snakeTiles)
+        this.foodLocation = SnakeService.generateFoodLocation(map.tiles, this.snakeTiles)
       } else this.snakeTiles.shift()
     }
-
 
     return this.getGameView()
   }
 
   private getGameView(): GameView {
     return {
-      tiles: this.map.tiles,
       snakeTiles: this.snakeTiles,
-      foodLocation: this.foodLocation,
+      foodLocation: this.foodLocation!,
       errors: this.errors
     }
   }
 
-  private validate(newPos: Coordinates): Error[] {
+  private validate(newPos: Coordinates, map: GameMap): Error[] {
     const errors = []
 
-    if (this.map.tiles[newPos.X][newPos.Y] === undefined) {
+    if (map.tiles[newPos.X][newPos.Y] === undefined) {
       errors.push(Error("Player out of field"))
     }
-    if (![TileType.Floor, TileType.Food, TileType.Snake].includes(this.map.tiles[newPos.X][newPos.Y])) {
+    if (![TileType.Floor, TileType.Food, TileType.Snake].includes(map.tiles[newPos.X][newPos.Y])) {
       errors.push(Error("Player crashed"))
     }
     if (this.snakeTiles.filter(snakeLoc => snakeLoc.X === newPos.X && snakeLoc.Y === newPos.Y).length > 0) {
@@ -112,7 +99,6 @@ export default class SnakeService implements ISnakeService {
 
     while (true) {
       let tmp = SnakeService.randomIndex(tiles.length)
-      console.log(tiles[tmp])
       if (tiles[tmp] !== undefined && tiles[tmp].includes(TileType.Floor)) {
         x = tmp
         break;
@@ -123,7 +109,6 @@ export default class SnakeService implements ISnakeService {
 
     while (true) {
       let tmp = SnakeService.randomIndex(tiles[x].length)
-      console.log(tiles[x][tmp])
       if (tiles[x][tmp] !== undefined && snakeTiles.filter(pos => pos.X === x && pos.Y === tmp).length < 1 && tiles[x][tmp] === TileType.Floor) {
         y = tmp
         break;
