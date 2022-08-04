@@ -1,59 +1,38 @@
-import React, {useState} from 'react';
-import {TileType as TT} from "../domain/TileType";
+import React, {useEffect, useState} from 'react';
 import SnakeService from "../service/SnakeService";
 import {Direction} from "../domain/Direction";
 import Game from "./game/Game";
 import {SnakeServiceContext} from "../context/SnakeServiceContext";
+import {MapServiceContext} from "../context/MapServiceContext";
+import HttpMapService from "../service/HttpMapService";
+import ISnakeService from "../domain/service/SnakeService";
 
 function App() {
-  const [snakeService] = useState(new SnakeService({
-    tiles: [
-      [TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Empty, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Floor, TT.Wall,],
-      [TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall, TT.Wall,],
-    ],
-    startLocation: {
-      X: 1,
-      Y: 1
-    }
-  }, Direction.Down))
+    const [mapService] = useState(new HttpMapService())
+    const [snakeService, setSnakeService] = useState<ISnakeService>()
 
-  return (
-    <div className="App">
-      <SnakeServiceContext.Provider value={snakeService}>
-        <Game gameSpeed={75}/>
-      </SnakeServiceContext.Provider>
-    </div>
-  );
+    useEffect(() => {
+        if (!snakeService) {
+            mapService.load("map1")
+                .then(map => setSnakeService(new SnakeService({
+                    tiles: map,
+                    startLocation: {
+                        X: 1,
+                        Y: 1
+                    }
+                }, Direction.Down)))
+        }
+    })
+
+    return (
+        <div className="App">
+            {snakeService && <SnakeServiceContext.Provider value={snakeService}>
+                <MapServiceContext.Provider value={mapService}>
+                    <Game gameSpeed={75}/>
+                </MapServiceContext.Provider>
+            </SnakeServiceContext.Provider>}
+        </div>
+    );
 }
 
 export default App;
