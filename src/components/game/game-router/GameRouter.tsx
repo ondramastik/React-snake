@@ -1,5 +1,5 @@
 import React, {FC, useState} from 'react';
-import {BrowserRouter, Route, Routes} from "react-router-dom";
+import {HashRouter, Route, Routes} from "react-router-dom";
 import HttpMapService from "../../../service/HttpMapService";
 import Menu from "../../menu/Menu";
 import {MapServiceContext} from "../../../context/MapServiceContext";
@@ -10,7 +10,7 @@ const GameRouter: FC = () => {
     const [mapService] = useState(new HttpMapService())
 
     return (
-        <BrowserRouter>
+        <HashRouter>
             <MapServiceContext.Provider value={mapService}>
                 <Routes>
                     <Route path="/React-snake/">
@@ -23,7 +23,7 @@ const GameRouter: FC = () => {
                     </Route>
                 </Routes>
             </MapServiceContext.Provider>
-        </BrowserRouter>
+        </HashRouter>
     );
 }
 
