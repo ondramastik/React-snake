@@ -20,15 +20,21 @@ const resolveTile = (gameMap: GameMap, gameField: GameMeta, pos: Coordinates) =>
     return gameMap.tiles[pos.X][pos.Y]
 }
 
+
 const GameFieldPresenter: FC<Props> = ({gameMap, gameMeta}) => {
-    return <div id="game-field-presenter" className="overflow-hidden" style={{position: "relative"}}>
+    return <div id="game-field-presenter" className="overflow-hidden">
         <div className="grid flex justify-center"
              style={{gridTemplateColumns: `repeat(${gameMap.tiles[0].length}, 1fr`}}>
             {gameMap.tiles.map((row, x) =>
                 row.map((tile, y) => <div
-                    className={`aspect-square tile tile-${resolveTile(gameMap, gameMeta, {X: x, Y: y})}`}
+                    className={`aspect-square tile tile-${gameMap.tiles[x][y]} relative`}
                     style={{maxWidth: `calc(80vh / ${gameMap.tiles[0].length})`}}
-                    key={`${x}-${y}`}/>)
+                    key={`${x}-${y}`}>
+                    {gameMeta.foodLocation.X === x && gameMeta.foodLocation.Y === y &&
+                        <div className="z-50 absolute top-0 left-0 h-full w-full tile tile-4"/>}
+                    {gameMeta.snakeTiles.some(tile => tile.X === x && tile.Y === y) &&
+                        <div className="z-50 absolute top-0 left-0 h-full w-full tile tile-3"/>}
+                </div>)
             )}
         </div>
     </div>
