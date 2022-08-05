@@ -23,9 +23,14 @@ const GameContainer: FC = () => {
             mapService.load(gameParams.map!)
                 .then(map => setSnakeService(new SnakeService(map, parseInt(gameParams.speed!))))
         }
+        document.body.style.overscrollBehavior = 'contain';
+
+        return () => {
+            document.body.style.overscrollBehavior = 'initial';
+        }
     })
 
-    return <div id="game-container" className="w-full">
+    return <div id="game-container" className="w-full overscroll-contain">
         {snakeService && <SnakeServiceContext.Provider value={snakeService}>
             <Game/>
         </SnakeServiceContext.Provider>}
