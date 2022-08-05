@@ -17,9 +17,9 @@ const GameFieldPresenter: FC<Props> = ({gameMap, gameMeta}) => {
                     className={`aspect-square tile tile-${gameMap.tiles[x][y]}`}
                     style={{maxWidth: `calc(80vh / ${gameMap.tiles[0].length})`}}
                     key={`${x}-${y}`}>
-                    {gameMeta.foodLocation.X === x && gameMeta.foodLocation.Y === y &&
-                        <div className="h-full w-full tile tile-4"/>}
-                    {gameMeta.snakeTiles.some(tile => tile.X === x && tile.Y === y) &&
+                    {gameMeta.foodLocation.X === x && gameMeta.foodLocation.Y === y ?
+                        <div className="h-full w-full tile tile-4"/> :
+                        gameMeta.snakeTiles.some(tile => tile.X === x && tile.Y === y) &&
                         <div className="h-full w-full tile tile-3"/>}
                 </div>)
             )}
