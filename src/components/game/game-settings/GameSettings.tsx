@@ -42,8 +42,8 @@ const GameSettings: FC = () => {
             </li>
             <li>
                 <label htmlFor="map">Map:</label>
-                {mapListLoaded ? <select id="map" onChange={handleMapChange}>
-                    {mapList?.map(map => <option selected={selectedMap === map} key={map} value={map}>{map}</option>)}
+                {mapListLoaded ? <select id="map" onChange={handleMapChange} value={selectedMap}>
+                    {mapList?.map(map => <option key={map} value={map}>{map}</option>)}
                 </select> : "Loading map list.."}
             </li>
             <li>
