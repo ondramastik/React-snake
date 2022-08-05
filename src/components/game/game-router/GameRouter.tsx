@@ -10,10 +10,10 @@ const GameRouter: FC = () => {
     const [mapService] = useState(new HttpMapService())
 
     return (
-        <HashRouter>
-            <MapServiceContext.Provider value={mapService}>
+        <MapServiceContext.Provider value={mapService}>
+            <HashRouter basename="/">
                 <Routes>
-                    <Route path="/React-snake/">
+                    <Route path="/">
                         <Route index element={<Menu/>}/>
                         <Route path="game">
                             <Route index element={<GameSettings/>}/>
@@ -22,8 +22,8 @@ const GameRouter: FC = () => {
                         <Route path="map-editor" element={"<MapEditor/>"}/>
                     </Route>
                 </Routes>
-            </MapServiceContext.Provider>
-        </HashRouter>
+            </HashRouter>
+        </MapServiceContext.Provider>
     );
 }
 
