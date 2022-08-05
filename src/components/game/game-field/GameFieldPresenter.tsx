@@ -1,32 +1,30 @@
 import React, {FC} from 'react';
 import './GameFieldPresenter.css';
-import GameView from "../../../domain/GameView";
-import Coordinates from "../../../domain/Coordinates";
+import GameMeta from "../../../domain/GameMeta";
 import {TileType} from "../../../domain/TileType";
+import GameMap from "../../../domain/GameMap";
 
 interface Props {
-  gameField: GameView
+    gameMap: GameMap
+    gameMeta: GameMeta
 }
 
-const resolveTile = (gameField: GameView, pos: Coordinates) => {
-  if(gameField.snakeTiles.filter(location => location.X === pos.X && location.Y === pos.Y).length > 0) {
-    return TileType.Snake
-  } else if(gameField.foodLocation.X === pos.X && gameField.foodLocation.Y === pos.Y) {
-    return TileType.Food
-  }
 
-  return gameField.tiles[pos.X][pos.Y]
-}
-
-const GameFieldPresenter: FC<Props> = ({gameField}) => {
-  return <div id="game-field-presenter">
-    {gameField.tiles.map(
-      (row, x) => <React.Fragment>
-        {row.map((tile, y) => <div
-          className={`tile tile-${resolveTile(gameField, {X: x, Y: y})}`} key={`${x}-${y}`}/>)}
-        <div/>
-      </React.Fragment>)}
-  </div>
+const GameFieldPresenter: FC<Props> = ({gameMap, gameMeta}) => {
+    return <div id="game-field-presenter" style={{position: "relative"}}>
+        {gameMap.tiles.map(
+            (row, x) => <React.Fragment>
+                {row.map((tile, y) => <div
+                    className={`tile tile-${gameMap.tiles[x][y]}`} key={`${x}-${y}`}/>)}
+                <div/>
+            </React.Fragment>)}
+        <div style={{position: "absolute", top: 20 * gameMeta.foodLocation.X, left: 20 * gameMeta.foodLocation.Y}}
+             className={`tile tile-${TileType.Food}`}/>
+        {gameMeta.snakeTiles.map(location => <div
+            style={{position: "absolute", top: 20 * location.X, left: 20 * location.Y}}
+            className={`tile tile-${TileType.Snake}`}
+            key={`snake-${location.X}-${location.Y}`}/>)}
+    </div>
 }
 
 export default GameFieldPresenter

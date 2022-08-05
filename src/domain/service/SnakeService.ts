@@ -1,10 +1,21 @@
-import GameView from "../GameView";
+import GameMeta from "../GameMeta";
 import {Direction} from "../Direction";
+import GameMap from "../GameMap";
 
 export default interface ISnakeService {
 
-  tick(direction?: Direction): Promise<GameView>
+    getMap(): GameMap
 
-  reset(): Promise<GameView>
+    tick(direction?: Direction): Promise<GameMeta>
+
+    reset(): Promise<GameMeta>
+
+    getScore(): number
+
+    getTickNumber(): number
+
+    hasError(): boolean
+
+    getErrorCause(): string | undefined
 
 }

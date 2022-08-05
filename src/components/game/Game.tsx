@@ -1,42 +1,29 @@
 import React, {FC, useCallback, useContext, useEffect, useState} from 'react';
-import GameView from "../../domain/GameView";
+import GameMeta from "../../domain/GameMeta";
 import ISnakeService from "../../domain/service/SnakeService";
 import {SnakeServiceContext} from "../../context/SnakeServiceContext";
 import GameFieldPresenter from "./game-field/GameFieldPresenter";
 import {Direction} from "../../domain/Direction";
-import IMapService from "../../domain/service/IMapService";
-import {MapServiceContext} from "../../context/MapServiceContext";
 
-interface Props {
-    gameSpeed: number
-}
 
-const Game: FC<Props> = ({gameSpeed}) => {
-    const [gameView, setGameView] = useState<GameView | undefined>()
-
-    const [running, setRunning] = useState(false)
-
-    const [error, setError] = useState(false)
-    const [errorCause, setErrorCause] = useState()
-
-    const [tick, setTick] = useState(0)
-    const [currentDirection, setCurrentDirection] = useState<Direction>()
-    const [nextDirection, setNextDirection] = useState<Direction>()
-
+const Game: FC = () => {
     const snakeService: ISnakeService = useContext(SnakeServiceContext)
-    const mapService: IMapService = useContext(MapServiceContext)
 
-    const restart = () => {
+    const [gameMeta, setGameMeta] = useState<GameMeta | undefined>()
+
+    const [running, setRunning] = useState(true)
+
+    const [nextDirection, setNextDirection] = useState<Direction>()
+    const [tickInProgress, setTickInProgress] = useState<boolean>(false)
+
+    const restart = useCallback(() => {
         snakeService.reset()
-            .then(gameView => setGameView(gameView))
+            .then(gameView => setGameMeta(gameView))
 
-        setTick(0)
-        setError(false)
-        setErrorCause(undefined)
         setRunning(true)
         setNextDirection(undefined)
-        setCurrentDirection(undefined)
-    }
+        setTickInProgress(false)
+    }, [snakeService])
 
     const isValidDirection = useCallback((prevDirection?: Direction, newDirection?: Direction) => {
         switch (newDirection) {
@@ -61,64 +48,52 @@ const Game: FC<Props> = ({gameSpeed}) => {
     }, [])
 
     useEffect(() => {
-        if (!error && !running) {
-            document.addEventListener('keydown', function (e) {
-                let newDirection: Direction | undefined = undefined
-                switch (e.code) {
-                    case "ArrowLeft":
-                        newDirection = Direction.Left
-                        break;
-                    case "ArrowUp":
-                        newDirection = Direction.Top
-                        break;
-                    case "ArrowRight":
-                        newDirection = Direction.Right
-                        break;
-                    case "ArrowDown":
-                        newDirection = Direction.Down
-                        break;
-                }
+        document.addEventListener('keydown', function (e) {
+            let newDirection: Direction | undefined = undefined
+            switch (e.code) {
+                case "ArrowLeft":
+                    newDirection = Direction.Left
+                    break;
+                case "ArrowUp":
+                    newDirection = Direction.Top
+                    break;
+                case "ArrowRight":
+                    newDirection = Direction.Right
+                    break;
+                case "ArrowDown":
+                    newDirection = Direction.Down
+                    break;
+                case "Space":
+                    console.log("Space")
+                    restart()
+                    break;
+            }
 
-                if (newDirection !== undefined) {
-                    setNextDirection(newDirection)
-                }
-            })
-
-            setRunning(true)
-        }
-    }, [currentDirection, error, isValidDirection, running])
+            if (newDirection !== undefined) {
+                setNextDirection(newDirection)
+            }
+        })
+    }, [restart])
 
     useEffect(() => {
-        if (running) {
-            setTimeout(() => setTick(tick + 1), gameSpeed)
-
+        if (running && !tickInProgress) {
+            setTickInProgress(true)
             snakeService
                 .tick(nextDirection)
-                .then(gameView => setGameView(gameView))
-                .catch(reason => {
-                    setErrorCause(reason.message)
+                .then(meta => setTimeout(() => setGameMeta(meta), meta.nextTickIn))
+                .then(() => setTickInProgress(false))
+                .catch(() => {
                     setRunning(false)
-                    setError(true)
                 })
-
-            setCurrentDirection(nextDirection)
         }
-    }, [gameSpeed, running, snakeService, tick])
-
-    useEffect(() => {
-        if (!isValidDirection(currentDirection, nextDirection)) {
-            setNextDirection(currentDirection)
-        }
-    }, [currentDirection, isValidDirection, nextDirection])
+    }, [gameMeta])
 
 
     return <div id="game">
-        <h1>Směr: {currentDirection}</h1>
-        <h1>Tick: {tick}</h1>
-        {errorCause && <h1>Error: {errorCause}</h1>}
-        {gameView && <GameFieldPresenter gameField={gameView}/>}
+        <h1>Tick: {snakeService.getTickNumber()}, Score: {snakeService.getScore()}</h1>
+        {snakeService.hasError() && <h1>Error: {snakeService.getErrorCause()}</h1>}
+        {gameMeta && <GameFieldPresenter gameMap={snakeService.getMap()} gameMeta={gameMeta}/>}
         <button onClick={() => restart()} disabled={running}>Restart</button>
-        <button onClick={() => mapService.list().then(maps => console.log(maps))}>Get maps</button>
     </div>
 }
 

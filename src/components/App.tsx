@@ -19,8 +19,9 @@ function App() {
                     startLocation: {
                         X: 1,
                         Y: 1
-                    }
-                }, Direction.Down)))
+                    },
+                    startDirection: Direction.Down
+                })))
         }
     })
 
@@ -28,7 +29,7 @@ function App() {
         <div className="App">
             {snakeService && <SnakeServiceContext.Provider value={snakeService}>
                 <MapServiceContext.Provider value={mapService}>
-                    <Game gameSpeed={75}/>
+                    <Game />
                 </MapServiceContext.Provider>
             </SnakeServiceContext.Provider>}
         </div>
