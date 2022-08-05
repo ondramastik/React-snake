@@ -23,8 +23,8 @@ export default class SnakeService implements ISnakeService {
 
     private speed: number
 
-    private eatingAudio = new Audio('React-snake/resources/audio/eating.wav');
-    private deathAudio = new Audio('React-snake/resources/audio/death.mp3');
+    private eatingAudio = new Audio('/React-snake/resources/audio/eating.wav');
+    private deathAudio = new Audio('/React-snake/resources/audio/death.mp3');
 
     constructor(map: GameMap, speed: number = 5) {
         this._map = map

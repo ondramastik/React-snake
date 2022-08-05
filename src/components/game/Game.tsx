@@ -90,7 +90,7 @@ const Game: FC = () => {
 
 
     return <div id="game">
-        <h1>Tick: {snakeService.getTickNumber()}, Score: {snakeService.getScore()}</h1>
+        <h1>Score: {snakeService.getScore()}</h1>
         {snakeService.hasError() && <h1>Error: {snakeService.getErrorCause()}</h1>}
         {gameMeta && <GameFieldPresenter gameMap={snakeService.getMap()} gameMeta={gameMeta}/>}
         <button onClick={() => restart()} disabled={running}>Restart</button>
