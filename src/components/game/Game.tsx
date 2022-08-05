@@ -75,6 +75,10 @@ const Game: FC = () => {
             }
         }
 
+        document.body.addEventListener('touchstart', function (e) { // This is to disable scrolling on mobile devices
+            e.preventDefault();
+        });
+
         document.addEventListener('keydown', function (e) {
             let newDirection: Direction | undefined = undefined
             switch (e.code) {
