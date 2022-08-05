@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import SnakeService from "../service/SnakeService";
-import {Direction} from "../domain/Direction";
 import Game from "./game/Game";
 import {SnakeServiceContext} from "../context/SnakeServiceContext";
 import {MapServiceContext} from "../context/MapServiceContext";
@@ -13,15 +12,8 @@ function App() {
 
     useEffect(() => {
         if (!snakeService) {
-            mapService.load("map1")
-                .then(map => setSnakeService(new SnakeService({
-                    tiles: map,
-                    startLocation: {
-                        X: 1,
-                        Y: 1
-                    },
-                    startDirection: Direction.Down
-                })))
+            mapService.load("map2")
+                .then(map => setSnakeService(new SnakeService(map)))
         }
     })
 
@@ -29,7 +21,7 @@ function App() {
         <div className="App">
             {snakeService && <SnakeServiceContext.Provider value={snakeService}>
                 <MapServiceContext.Provider value={mapService}>
-                    <Game />
+                    <Game/>
                 </MapServiceContext.Provider>
             </SnakeServiceContext.Provider>}
         </div>

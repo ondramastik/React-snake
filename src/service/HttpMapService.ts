@@ -1,6 +1,6 @@
 import IMapService from "../domain/service/IMapService";
-import {TileType} from "../domain/TileType";
 import axios from 'axios';
+import GameMap from "../domain/GameMap";
 
 export default class HttpMapService implements IMapService {
 
@@ -8,7 +8,7 @@ export default class HttpMapService implements IMapService {
         return axios.get('/React-snake/resources/maps/maplist.json').then(response => response.data)
     }
 
-    load(name: string): Promise<TileType[][]> {
+    load(name: string): Promise<GameMap> {
         return axios.get(`/React-snake/resources/maps/${name}.json`).then(response => response.data)
     }
 

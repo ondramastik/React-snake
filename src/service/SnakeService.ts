@@ -61,6 +61,7 @@ export default class SnakeService implements ISnakeService {
 
     reset(): Promise<GameMeta> {
         this.snakeTiles = [{...this._map.startLocation}]
+        this.prevDirection = this._map.startDirection
         this.foodLocation = SnakeService.generateFoodLocation(this._map.tiles)
         this.score = 0
         this.tickNumber = 0
