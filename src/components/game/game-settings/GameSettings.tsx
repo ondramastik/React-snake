@@ -1,6 +1,9 @@
 import React, {ChangeEvent, FC, useEffect, useState} from 'react';
 import HttpMapService from "../../../service/HttpMapService";
-import {Link} from "react-router-dom";
+import Card from "../../common/Card/Card";
+import Select from "../../common/controls/Select";
+import Input from "../../common/controls/Input";
+import ButtonLink from "../../common/controls/ButtonLink";
 
 
 const GameSettings: FC = () => {
@@ -35,21 +38,24 @@ const GameSettings: FC = () => {
     }
 
     return (
-        <ul>
-            <li>
-                <label htmlFor="speed">Speed:</label>
-                <input id="speed" type="number" onChange={handleSpeedChange} value={speed}/>
-            </li>
-            <li>
-                <label htmlFor="map">Map:</label>
-                {mapListLoaded ? <select id="map" onChange={handleMapChange} value={selectedMap}>
-                    {mapList?.map(map => <option key={map} value={map}>{map}</option>)}
-                </select> : "Loading map list.."}
-            </li>
-            <li>
-                <Link to={`play/${selectedMap}/${speed}`}>Play</Link>
-            </li>
-        </ul>
+        <Card>
+            <ul className="space-y-2 p-2">
+                <li className="flex justify-between align-middle">
+                    <p>Speed:</p>
+                    <Input className="w-4/6" label="speed" id="speed" type="number" onChange={handleSpeedChange}
+                           value={speed}/>
+                </li>
+                <li className="flex justify-between space-x-8 align-middle">
+                    <p>Map:</p>
+                    {mapListLoaded && mapList ?
+                        <Select className="w-4/6" label="map" id="map" onChange={handleMapChange} value={selectedMap}
+                                options={mapList}/> : "Loading map list.."}
+                </li>
+                <li className="flex justify-end">
+                    <ButtonLink to={`play/${selectedMap}/${speed}`}>Play</ButtonLink>
+                </li>
+            </ul>
+        </Card>
     );
 }
 
