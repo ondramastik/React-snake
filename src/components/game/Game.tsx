@@ -29,6 +29,52 @@ const Game: FC = () => {
     }, [snakeService])
 
     useEffect(() => {
+        let pageWidth = window.innerWidth || document.body.clientWidth;
+        let treshold = Math.max(1, Math.floor(0.01 * (pageWidth)));
+        let touchstartX = 0;
+        let touchstartY = 0;
+        let touchendX = 0;
+        let touchendY = 0;
+
+        const limit = Math.tan(45 * 1.5 / 180 * Math.PI);
+        const gestureZone = document
+
+        gestureZone.addEventListener('touchstart', function (event) {
+            touchstartX = event.changedTouches[0].screenX;
+            touchstartY = event.changedTouches[0].screenY;
+        }, false);
+
+        gestureZone.addEventListener('touchend', function (event) {
+            touchendX = event.changedTouches[0].screenX;
+            touchendY = event.changedTouches[0].screenY;
+            handleGesture(event);
+        }, false);
+
+        function handleGesture(e: TouchEvent) {
+            let x = touchendX - touchstartX;
+            let y = touchendY - touchstartY;
+            let xy = Math.abs(x / y);
+            let yx = Math.abs(y / x);
+            if (Math.abs(x) > treshold || Math.abs(y) > treshold) {
+                if (yx <= limit) {
+                    if (x < 0) {
+                        setNextDirection(Direction.Left)
+                    } else {
+                        setNextDirection(Direction.Right)
+                    }
+                }
+                if (xy <= limit) {
+                    if (y < 0) {
+                        setNextDirection(Direction.Top)
+                    } else {
+                        setNextDirection(Direction.Down)
+                    }
+                }
+            } else {
+                console.log("tap");
+            }
+        }
+
         document.addEventListener('keydown', function (e) {
             let newDirection: Direction | undefined = undefined
             switch (e.code) {
@@ -69,7 +115,7 @@ const Game: FC = () => {
     }, [gameMeta])
 
 
-    return <div id="game" className="space-y-4">
+    return <div id="game" className="space-y-4 max-w-[80vh] mx-auto">
         <Card>
             <Link to="../../game">
                 {"<--"} Go back

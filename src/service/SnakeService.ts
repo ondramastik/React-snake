@@ -89,6 +89,7 @@ export default class SnakeService implements ISnakeService {
 
 
     private handleTick(direction: Direction): GameMeta {
+        console.log(direction)
         const currentHeadPos = this.snakeTiles[this.snakeTiles.length - 1]
         const newPos = {...currentHeadPos}
 

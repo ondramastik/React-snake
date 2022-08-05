@@ -25,7 +25,7 @@ const GameContainer: FC = () => {
         }
     })
 
-    return <div id="game-container">
+    return <div id="game-container" className="w-full">
         {snakeService && <SnakeServiceContext.Provider value={snakeService}>
             <Game/>
         </SnakeServiceContext.Provider>}
