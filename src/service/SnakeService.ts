@@ -23,14 +23,19 @@ export default class SnakeService implements ISnakeService {
 
     private speed: number
 
+    private prevDirection: Direction
+
     private eatingAudio = new Audio('/React-snake/resources/audio/eating.wav');
     private deathAudio = new Audio('/React-snake/resources/audio/death.mp3');
 
     constructor(map: GameMap, speed: number = 5) {
         this._map = map
+        this.prevDirection = map.startDirection
         this.foodLocation = SnakeService.generateFoodLocation(map.tiles)
         this.snakeTiles = [{...map.startLocation}]
         this.speed = speed
+        this.eatingAudio.load()
+        this.deathAudio.load()
     }
 
     getMap(): GameMap {
@@ -40,7 +45,10 @@ export default class SnakeService implements ISnakeService {
     tick(direction?: Direction): Promise<GameMeta> {
         return new Promise<GameMeta>((resolve, reject) => {
             try {
-                const gameView = this.handleTick(direction !== undefined ? direction : this._map.startDirection)
+                const isValidDirection = SnakeService.isValidDirection(this.prevDirection, direction)
+                const newDirection = direction !== undefined && isValidDirection ? direction : this.prevDirection
+                const gameView = this.handleTick(newDirection)
+                this.prevDirection = newDirection
                 resolve(gameView)
             } catch (e) {
                 this.error = true
@@ -137,7 +145,6 @@ export default class SnakeService implements ISnakeService {
 
         while (true) {
             let tmp = SnakeService.randomIndex(tiles.length)
-            console.log(tiles[tmp])
             if (tiles[tmp] !== undefined && tiles[tmp].includes(TileType.Floor)) {
                 x = tmp
                 break;
@@ -148,7 +155,6 @@ export default class SnakeService implements ISnakeService {
 
         while (true) {
             let tmp = SnakeService.randomIndex(tiles[x].length)
-            console.log(tiles[x][tmp])
             if (tiles[x][tmp] !== undefined && tiles[x][tmp] === TileType.Floor) {
                 y = tmp
                 break;
@@ -163,6 +169,28 @@ export default class SnakeService implements ISnakeService {
 
     private static randomIndex(max: number): number {
         return Math.floor((Math.random() * max))
+    }
+
+    private static isValidDirection(prevDirection?: Direction, newDirection?: Direction): boolean {
+        switch (newDirection) {
+            case Direction.Left:
+                if (prevDirection === Direction.Right)
+                    return false
+                break
+            case Direction.Top:
+                if (prevDirection === Direction.Down)
+                    return false
+                break
+            case Direction.Right:
+                if (prevDirection === Direction.Left)
+                    return false
+                break
+            case Direction.Down:
+                if (prevDirection === Direction.Top)
+                    return false
+                break
+        }
+        return true
     }
 
 

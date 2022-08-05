@@ -25,28 +25,6 @@ const Game: FC = () => {
         setTickInProgress(false)
     }, [snakeService])
 
-    const isValidDirection = useCallback((prevDirection?: Direction, newDirection?: Direction) => {
-        switch (newDirection) {
-            case Direction.Left:
-                if (prevDirection === Direction.Right)
-                    return false
-                break
-            case Direction.Top:
-                if (prevDirection === Direction.Down)
-                    return false
-                break
-            case Direction.Right:
-                if (prevDirection === Direction.Left)
-                    return false
-                break
-            case Direction.Down:
-                if (prevDirection === Direction.Top)
-                    return false
-                break
-        }
-        return true
-    }, [])
-
     useEffect(() => {
         document.addEventListener('keydown', function (e) {
             let newDirection: Direction | undefined = undefined
@@ -64,7 +42,6 @@ const Game: FC = () => {
                     newDirection = Direction.Down
                     break;
                 case "Space":
-                    console.log("Space")
                     restart()
                     break;
             }
