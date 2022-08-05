@@ -21,7 +21,7 @@ const resolveTile = (gameMap: GameMap, gameField: GameMeta, pos: Coordinates) =>
 }
 
 const GameFieldPresenter: FC<Props> = ({gameMap, gameMeta}) => {
-    return <div id="game-field-presenter" style={{position: "relative"}}>
+    return <div id="game-field-presenter" className="overflow-hidden" style={{position: "relative"}}>
         <div className="grid flex justify-center"
              style={{gridTemplateColumns: `repeat(${gameMap.tiles[0].length}, 1fr`}}>
             {gameMap.tiles.map((row, x) =>
