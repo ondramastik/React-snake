@@ -7,7 +7,9 @@ import GameMap from "../domain/GameMap";
 
 export default class SnakeService implements ISnakeService {
 
-    private _map: GameMap
+    private readonly _map: GameMap
+
+    private readonly speed: number
 
     private foodLocation: Coordinates
 
@@ -20,8 +22,6 @@ export default class SnakeService implements ISnakeService {
     private error: boolean = false
 
     private errorCause: string | undefined
-
-    private speed: number
 
     private prevDirection: Direction
 
