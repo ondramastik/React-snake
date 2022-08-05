@@ -4,6 +4,7 @@ import Card from "../../common/Card/Card";
 import Select from "../../common/controls/Select";
 import Input from "../../common/controls/Input";
 import ButtonLink from "../../common/controls/ButtonLink";
+import Button from "../../common/controls/Button";
 
 
 const GameSettings: FC = () => {
@@ -26,11 +27,15 @@ const GameSettings: FC = () => {
         }
     })
 
+    function changeSpeed(speed: number) {
+        if (speed >= 1 && speed <= 10) {
+            setSpeed(speed)
+        }
+    }
+
     function handleSpeedChange(event: ChangeEvent<HTMLInputElement>) {
         const value = parseInt(event.target.value)
-        if (value >= 1 && value <= 10) {
-            setSpeed(value)
-        }
+        changeSpeed(value)
     }
 
     function handleMapChange(event: ChangeEvent<HTMLSelectElement>) {
@@ -42,8 +47,12 @@ const GameSettings: FC = () => {
             <ul className="space-y-2 p-2">
                 <li className="flex justify-between align-middle">
                     <p>Speed:</p>
-                    <Input className="w-4/6" label="speed" id="speed" type="number" onChange={handleSpeedChange}
-                           value={speed}/>
+                    <div className="w-4/6 flex space-x-1">
+                        <Button disabled={speed <= 1} onClick={() => changeSpeed(speed - 1)}>-</Button>
+                        <Input label="speed" id="speed" type="number" onChange={handleSpeedChange}
+                               value={speed}/>
+                        <Button disabled={speed >= 10} onClick={() => changeSpeed(speed + 1)}>+</Button>
+                    </div>
                 </li>
                 <li className="flex justify-between space-x-8 align-middle">
                     <p>Map:</p>
