@@ -5,6 +5,7 @@ import Select from "../../common/controls/Select";
 import Input from "../../common/controls/Input";
 import ButtonLink from "../../common/controls/ButtonLink";
 import Button from "../../common/controls/Button";
+import {Link} from "react-router-dom";
 
 
 const GameSettings: FC = () => {
@@ -60,7 +61,8 @@ const GameSettings: FC = () => {
                         <Select className="w-4/6" label="map" id="map" onChange={handleMapChange} value={selectedMap}
                                 options={mapList}/> : "Loading map list.."}
                 </li>
-                <li className="flex justify-end">
+                <li className="flex justify-between">
+                    <ButtonLink to={`/`}>Main menu</ButtonLink>
                     <ButtonLink to={`play/${selectedMap}/${speed}`}>Play</ButtonLink>
                 </li>
             </ul>

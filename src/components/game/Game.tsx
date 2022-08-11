@@ -7,6 +7,7 @@ import {Direction} from "../../domain/Direction";
 import Card from "../common/Card/Card";
 import Button from "../common/controls/Button";
 import {Link} from "react-router-dom";
+import ButtonLink from "../common/controls/ButtonLink";
 
 
 const Game: FC = () => {
@@ -115,14 +116,14 @@ const Game: FC = () => {
     }, [gameMeta])
 
 
-    return <div id="game" className="space-y-4 max-w-[80vh] mx-auto">
-        <Card>
-            <Link to="../../game">
-                {"<--"} Go back
-            </Link>
+    return <div id="game" className="space-y-4 max-w-[75vh] mx-auto">
+        <Card className="space-y-2">
             <div className="flex justify-between items-center">
                 <p className="text-slate-900 font-bold text-lg">Score: {snakeService.getScore()}</p>
                 {snakeService.hasError() && <p className="text-lg text-red-700">{snakeService.getErrorCause()}</p>}
+            </div>
+            <div className="flex justify-end space-x-2">
+                <ButtonLink to="../../game">Settings</ButtonLink>
                 <Button onClick={() => restart()} disabled={running}>Restart (space)</Button>
             </div>
         </Card>
