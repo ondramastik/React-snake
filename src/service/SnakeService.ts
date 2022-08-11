@@ -25,7 +25,6 @@ export default class SnakeService implements ISnakeService {
 
     private prevDirection: Direction
 
-    private eatingAudio = new Audio('/React-snake/resources/audio/eating.wav');
     private deathAudio = new Audio('/React-snake/resources/audio/death.mp3');
 
     constructor(map: GameMap, speed: number = 5) {
@@ -34,7 +33,6 @@ export default class SnakeService implements ISnakeService {
         this.foodLocation = SnakeService.generateFoodLocation(map.tiles)
         this.snakeTiles = [{...map.startLocation}]
         this.speed = speed
-        this.eatingAudio.load()
         this.deathAudio.load()
     }
 
@@ -67,6 +65,7 @@ export default class SnakeService implements ISnakeService {
         this.tickNumber = 0
         this.error = false
         this.errorCause = undefined
+        this.deathAudio.pause()
 
         return Promise.resolve(this.getGameMeta())
     }
@@ -113,7 +112,8 @@ export default class SnakeService implements ISnakeService {
         this.snakeTiles.push(newPos)
 
         if (this.foodLocation.X === newPos.X && this.foodLocation.Y === newPos.Y) {
-            this.eatingAudio.play()
+            const eatingAudio = new Audio('/React-snake/resources/audio/eating.wav');
+            eatingAudio.play()
             this.foodLocation = SnakeService.generateFoodLocation(this._map.tiles)
             this.score += this.speed
         } else this.snakeTiles.shift()
