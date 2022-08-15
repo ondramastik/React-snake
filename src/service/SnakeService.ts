@@ -30,7 +30,7 @@ export default class SnakeService implements ISnakeService {
     constructor(map: GameMap, speed: number = 5) {
         this._map = map
         this.prevDirection = map.startDirection
-        this.foodLocation = SnakeService.generateFoodLocation(map.tiles)
+        this.foodLocation = SnakeService.generateFoodLocation(map.tiles, [map.startLocation])
         this.snakeTiles = [{...map.startLocation}]
         this.speed = speed
         this.deathAudio.load()
@@ -60,7 +60,7 @@ export default class SnakeService implements ISnakeService {
     reset(): Promise<GameMeta> {
         this.snakeTiles = [{...this._map.startLocation}]
         this.prevDirection = this._map.startDirection
-        this.foodLocation = SnakeService.generateFoodLocation(this._map.tiles)
+        this.foodLocation = SnakeService.generateFoodLocation(this._map.tiles, this.snakeTiles)
         this.score = 0
         this.tickNumber = 0
         this.error = false
@@ -114,7 +114,7 @@ export default class SnakeService implements ISnakeService {
         if (this.foodLocation.X === newPos.X && this.foodLocation.Y === newPos.Y) {
             const eatingAudio = new Audio('/React-snake/resources/audio/eating.wav');
             eatingAudio.play()
-            this.foodLocation = SnakeService.generateFoodLocation(this._map.tiles)
+            this.foodLocation = SnakeService.generateFoodLocation(this._map.tiles, this.snakeTiles)
             this.score += this.speed
         } else this.snakeTiles.shift()
 
@@ -142,7 +142,7 @@ export default class SnakeService implements ISnakeService {
         }
     }
 
-    private static generateFoodLocation(tiles: TileType[][]): Coordinates {
+    private static generateFoodLocation(tiles: TileType[][], snakeTiles: Coordinates[]): Coordinates {
         let x: number = -1
 
         while (true) {
@@ -161,6 +161,10 @@ export default class SnakeService implements ISnakeService {
                 y = tmp
                 break;
             }
+        }
+
+        if (snakeTiles.some(snakeLoc => snakeLoc.X === x && snakeLoc.Y === y)) {
+            return SnakeService.generateFoodLocation(tiles, snakeTiles)
         }
 
         return {
