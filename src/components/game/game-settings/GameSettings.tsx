@@ -1,11 +1,10 @@
 import React, {ChangeEvent, FC, useEffect, useState} from 'react';
 import HttpMapService from "../../../service/HttpMapService";
-import Card from "../../common/Card/Card";
 import Select from "../../common/controls/Select";
 import Input from "../../common/controls/Input";
 import ButtonLink from "../../common/controls/ButtonLink";
 import Button from "../../common/controls/Button";
-import {Link} from "react-router-dom";
+import CardWithNavigation from "../../common/Card/CardWithNavigation";
 
 
 const GameSettings: FC = () => {
@@ -44,8 +43,8 @@ const GameSettings: FC = () => {
     }
 
     return (
-        <Card>
-            <ul className="space-y-2 p-2">
+        <CardWithNavigation>
+            <ul className="space-y-2">
                 <li className="flex justify-between align-middle">
                     <p>Speed:</p>
                     <div className="w-4/6 flex space-x-1">
@@ -61,12 +60,11 @@ const GameSettings: FC = () => {
                         <Select className="w-4/6" label="map" id="map" onChange={handleMapChange} value={selectedMap}
                                 options={mapList}/> : "Loading map list.."}
                 </li>
-                <li className="flex justify-between">
-                    <ButtonLink to={`/`}>Main menu</ButtonLink>
+                <li className="flex justify-end">
                     <ButtonLink to={`play/${selectedMap}/${speed}`}>Play</ButtonLink>
                 </li>
             </ul>
-        </Card>
+        </CardWithNavigation>
     );
 }
 

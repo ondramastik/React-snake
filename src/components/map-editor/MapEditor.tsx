@@ -1,12 +1,12 @@
 import React, {FC, useEffect, useState} from 'react';
 import {Direction} from "../../domain/Direction";
-import Card from "../common/Card/Card";
-import {Link} from "react-router-dom";
 import GameMap from "../../domain/GameMap";
 import {TileType} from "../../domain/TileType";
 import Button from "../common/controls/Button";
 import Input from "../common/controls/Input";
 import '../game/game-field/GameFieldPresenter.css';
+import CardWithNavigation from "../common/Card/CardWithNavigation";
+import RadioInput from "../common/controls/RadioInput";
 
 
 const MapEditor: FC = () => {
@@ -18,6 +18,7 @@ const MapEditor: FC = () => {
         startLocation: {X: 8, Y: 8},
         tiles: Array(mapHeight).fill(TileType.Empty).map(() => Array(mapWidth).fill(0))
     })
+    const [selectingStartLocation, setSelectingStartLocation] = useState(false)
 
     useEffect(() => {
         if (mapWidth !== mapDraft.tiles[0].length) {
@@ -48,6 +49,23 @@ const MapEditor: FC = () => {
         }
     }, [mapDraft, mapHeight, mapWidth])
 
+    function handleTileClick(x: number, y: number) {
+        if (selectingStartLocation) {
+            const newMapDraft = {...mapDraft}
+            newMapDraft.startLocation = {X: x, Y: y}
+            setMapDraft(newMapDraft)
+            setSelectingStartLocation(false)
+        } else {
+            transformTile(x, y)
+        }
+    }
+
+    function handleDirectionChange(direction: string) {
+        const newMapDraft = {...mapDraft}
+        newMapDraft.startDirection = direction as unknown as Direction
+        setMapDraft(newMapDraft)
+    }
+
     function transformTile(x: number, y: number) {
         const newMapDraft = {...mapDraft}
 
@@ -69,44 +87,37 @@ const MapEditor: FC = () => {
         a.click();
     }
 
-    useEffect(() => {
-
-        document.addEventListener('keydown', function (e) {
-            let newDirection: Direction | undefined = undefined
-            switch (e.code) {
-                case "ArrowLeft":
-                    newDirection = Direction.Left
-                    break;
-                case "ArrowUp":
-                    newDirection = Direction.Top
-                    break;
-                case "ArrowRight":
-                    newDirection = Direction.Right
-                    break;
-                case "ArrowDown":
-                    newDirection = Direction.Down
-                    break;
-                case "Space":
-                    break;
-            }
-        })
-    }, [])
-
-
     return <div id="game" className="flex justify-start items-center space-x-4 mx-auto w-full">
-        <Card className="space-y-2">
+        <CardWithNavigation className="space-y-2 text-center">
+            <p className="text-slate-900">Start location</p>
             <div className="flex justify-between">
-                <Link to="..">
-                    {"<--"} Go back
-                </Link>
-                <Input type="text" label={"Map name"} value={mapName} onChange={(e) => setMapName(e.target.value)}/>
-                <Button onClick={() => downloadTextFile(JSON.stringify(mapDraft), `${mapName}.json`)}>
-                    Download draft
+                <Button className="flex-none" disabled={selectingStartLocation}
+                        onClick={() => setSelectingStartLocation(true)}>
+                    Set
                 </Button>
+                <div
+                    className={`${selectingStartLocation ? "text-yellow-700" : "text-slate-900"} flex justify-end space-x-2 font-bold`}>
+                    <p>
+                        X: {mapDraft.startLocation.X}
+                    </p>
+                    <p>
+                        Y: {mapDraft.startLocation.Y}
+                    </p>
+                </div>
             </div>
-            <div className="flex justify-end space-x-1 items-center">
-                width
-                <Button onClick={() => mapWidth > 1 && setMapWidth(prevState => prevState - 1)}>
+            <p className="text-slate-900">Start direction</p>
+            <div className="flex justify-between">
+                <RadioInput value={mapDraft.startDirection.toString()} onChange={handleDirectionChange}
+                            options={{
+                                Left: Direction.Left.toString(),
+                                Right: Direction.Right.toString(),
+                                Top: Direction.Top.toString(),
+                                Down: Direction.Down.toString()
+                            }}/>
+            </div>
+            <p className="text-slate-900">Width</p>
+            <div className="flex justify-between items-center">
+                <Button onClick={() => setMapWidth(prevState => prevState - 1)} disabled={mapWidth <= 1}>
                     -
                 </Button>
                 <Input type="text" label={"Map width"} value={mapWidth}/>
@@ -114,9 +125,9 @@ const MapEditor: FC = () => {
                     +
                 </Button>
             </div>
-            <div className="flex justify-end space-x-1 items-center">
-                height
-                <Button onClick={() => mapWidth > 1 && setMapHeight(prevState => prevState - 1)}>
+            <p className="text-slate-900">Height</p>
+            <div className="flex justify-between items-center">
+                <Button onClick={() => setMapHeight(prevState => prevState - 1)} disabled={mapHeight <= 1}>
                     -
                 </Button>
                 <Input type="text" label={"Map height"} value={mapHeight}/>
@@ -124,14 +135,24 @@ const MapEditor: FC = () => {
                     +
                 </Button>
             </div>
-        </Card>
+            <p className="text-slate-900">Map name</p>
+            <div className="flex justify-between space-x-2">
+                <Input type="text" label={"Map name"} value={mapName} onChange={(e) => setMapName(e.target.value)}/>
+                <Button onClick={() => downloadTextFile(JSON.stringify(mapDraft), `${mapName}.json`)}>
+                    Download draft
+                </Button>
+            </div>
+        </CardWithNavigation>
         <div id="game-field-presenter" className="grid justify-center border-2 border-slate-900 min-h-0 h-auto"
              style={{gridTemplateColumns: `repeat(${mapDraft.tiles[0].length}, 1fr`}}>
             {mapDraft.tiles.map((row, x) =>
                 row.map((tile, y) => <button
-                    onClick={() => transformTile(x, y)}
+                    onClick={() => handleTileClick(x, y)}
                     className={`aspect-square tile tile-${mapDraft.tiles[x][y]} border border-dashed border-slate-400 hover:border-4`}
-                    style={{width: `calc(80vh / ${mapDraft.tiles[0].length})`, maxWidth: `calc(80vh / ${mapDraft.tiles.length})`}}
+                    style={{
+                        width: `calc(80vh / ${mapDraft.tiles[0].length})`,
+                        maxWidth: `calc(80vh / ${mapDraft.tiles.length})`
+                    }}
                     key={`${x}-${y}`}/>)
             )}
         </div>
