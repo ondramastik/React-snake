@@ -43,7 +43,7 @@ const GameSettings: FC = () => {
     }
 
     return (
-        <CardWithNavigation>
+        <CardWithNavigation heading="Game settings">
             <ul className="space-y-2">
                 <li className="flex justify-between align-middle">
                     <p>Speed:</p>

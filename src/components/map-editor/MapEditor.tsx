@@ -14,6 +14,7 @@ const MapEditor: FC = () => {
     const [mapName, setMapName] = useState<string>("new_map_1")
     const [mapHeight, setMapHeight] = useState<number>(30)
     const [mapDraft, setMapDraft] = useState<GameMap>({
+        name: "New map 1",
         startDirection: Direction.Right,
         startLocation: {X: 8, Y: 8},
         tiles: Array(mapHeight).fill(TileType.Empty).map(() => Array(mapWidth).fill(0))
@@ -40,7 +41,8 @@ const MapEditor: FC = () => {
             const newMapDraft = {...mapDraft}
 
             if (mapHeight > mapDraft.tiles.length) {
-                newMapDraft.tiles = newMapDraft.tiles.concat(Array(mapHeight - newMapDraft.tiles.length).fill(Array(mapWidth).fill(0)))
+                newMapDraft.tiles = newMapDraft.tiles.concat(
+                    Array(mapHeight - newMapDraft.tiles.length).map(() => Array(mapWidth).fill(0)))
             } else {
                 newMapDraft.tiles = newMapDraft.tiles.splice(mapHeight - 1, newMapDraft.tiles.length - mapHeight)
             }
@@ -87,8 +89,28 @@ const MapEditor: FC = () => {
         a.click();
     }
 
-    return <div id="game" className="flex justify-start items-center space-x-4 mx-auto w-full">
-        <CardWithNavigation className="space-y-2 text-center">
+    return <div id="game" className="flex justify-evenly items-center space-x-4 mx-auto w-full">
+        <CardWithNavigation className="space-y-2 text-center" heading="Map editor">
+            <p className="text-slate-900">Width</p>
+            <div className="flex justify-between items-center">
+                <Button onClick={() => setMapWidth(prevState => prevState - 1)} disabled={mapWidth <= 1}>
+                    -
+                </Button>
+                <p className="font-bold text-xl">{mapWidth}</p>
+                <Button onClick={() => setMapWidth(prevState => prevState + 1)}>
+                    +
+                </Button>
+            </div>
+            <p className="text-slate-900">Height</p>
+            <div className="flex justify-between items-center">
+                <Button onClick={() => setMapHeight(prevState => prevState - 1)} disabled={mapHeight <= 1}>
+                    -
+                </Button>
+                <p className="font-bold text-xl">{mapHeight}</p>
+                <Button onClick={() => setMapHeight(prevState => prevState + 1)}>
+                    +
+                </Button>
+            </div>
             <p className="text-slate-900">Start location</p>
             <div className="flex justify-between">
                 <Button className="flex-none" disabled={selectingStartLocation}
@@ -115,26 +137,6 @@ const MapEditor: FC = () => {
                                 Down: Direction.Down.toString()
                             }}/>
             </div>
-            <p className="text-slate-900">Width</p>
-            <div className="flex justify-between items-center">
-                <Button onClick={() => setMapWidth(prevState => prevState - 1)} disabled={mapWidth <= 1}>
-                    -
-                </Button>
-                <Input type="text" label={"Map width"} value={mapWidth}/>
-                <Button onClick={() => setMapWidth(prevState => prevState + 1)}>
-                    +
-                </Button>
-            </div>
-            <p className="text-slate-900">Height</p>
-            <div className="flex justify-between items-center">
-                <Button onClick={() => setMapHeight(prevState => prevState - 1)} disabled={mapHeight <= 1}>
-                    -
-                </Button>
-                <Input type="text" label={"Map height"} value={mapHeight}/>
-                <Button onClick={() => setMapHeight(prevState => prevState + 1)}>
-                    +
-                </Button>
-            </div>
             <p className="text-slate-900">Map name</p>
             <div className="flex justify-between space-x-2">
                 <Input type="text" label={"Map name"} value={mapName} onChange={(e) => setMapName(e.target.value)}/>
@@ -143,7 +145,7 @@ const MapEditor: FC = () => {
                 </Button>
             </div>
         </CardWithNavigation>
-        <div id="game-field-presenter" className="grid justify-center border-2 border-slate-900 min-h-0 h-auto"
+        <div id="game-field-presenter" className="grid border-2 border-slate-900 min-h-0 min-w-0"
              style={{gridTemplateColumns: `repeat(${mapDraft.tiles[0].length}, 1fr`}}>
             {mapDraft.tiles.map((row, x) =>
                 row.map((tile, y) => <button

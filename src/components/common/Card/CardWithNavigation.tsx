@@ -16,7 +16,7 @@ const CardWithNavigation: FC<Props> = ({children, ...rest}) => {
 
     return <Card {...rest}>
         <div className="flex flex-col">
-            <div className="pb-4 border-b border-slate-900">
+            <div className="py-4 border-b border-slate-900">
                 {children}
             </div>
             <Button className="mt-4" onClick={handleBackClick}>

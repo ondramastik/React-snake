@@ -13,16 +13,11 @@ const ListItemLink: FC<ListItemLinkProps> = ({label, link}) =>
     </li>
 
 const Menu: FC = () =>
-    <Card>
-        <div className=" space-y-2 divide-y divide-slate-900">
-            <p className="flex justify-center text-slate-900 text-3xl font-bold">
-                Snake
-            </p>
-            <ul>
-                <ListItemLink label="Play" link="game"/>
-                <ListItemLink label="Map editor" link="map-editor"/>
-            </ul>
-        </div>
+    <Card heading="Snake">
+        <ul>
+            <ListItemLink label="Play" link="game"/>
+            <ListItemLink label="Map editor" link="map-editor"/>
+        </ul>
     </Card>
 
 export default Menu;

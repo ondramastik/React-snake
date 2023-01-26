@@ -9,8 +9,8 @@ interface RadioInputProps {
 
 const RadioInput: FC<RadioInputProps> = ({options, value, onChange, ...rest}) =>
     <RadioGroup value={value} onChange={onChange} className="flex justify-between w-full">
-        {Object.entries(options).map(([option, index]) => <RadioGroup.Option value={index} className="text-slate-900">
-            {({checked}) => (<div className="flex space-x-2 items-center">
+        {Object.entries(options).map(([option, index]) => <RadioGroup.Option value={index} className="text-slate-900 hover:cursor-pointer">
+            {({checked}) => (<div className="flex space-x-2 p-1 items-center">
                     <p className="text-sm">{option}</p>
                     <div
                         className={`w-[1em] h-[1em] border-2 rounded-[1em] relative ${checked ? "border-slate-500" : "border-slate-900"}`}>

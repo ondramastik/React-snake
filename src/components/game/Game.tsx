@@ -4,9 +4,7 @@ import ISnakeService from "../../domain/service/SnakeService";
 import {SnakeServiceContext} from "../../context/SnakeServiceContext";
 import GameFieldPresenter from "./game-field/GameFieldPresenter";
 import {Direction} from "../../domain/Direction";
-import Card from "../common/Card/Card";
 import Button from "../common/controls/Button";
-import ButtonLink from "../common/controls/ButtonLink";
 import CardWithNavigation from "../common/Card/CardWithNavigation";
 
 
@@ -31,7 +29,7 @@ const Game: FC = () => {
 
     useEffect(() => {
         let pageWidth = window.innerWidth || document.body.clientWidth;
-        let treshold = Math.max(1, Math.floor(0.01 * (pageWidth)));
+        let threshold = Math.max(1, Math.floor(0.01 * (pageWidth)));
         let touchstartX = 0;
         let touchstartY = 0;
         let touchendX = 0;
@@ -51,12 +49,12 @@ const Game: FC = () => {
             handleGesture(event);
         }, false);
 
-        function handleGesture(e: TouchEvent) {
+        function handleGesture(_: TouchEvent) {
             let x = touchendX - touchstartX;
             let y = touchendY - touchstartY;
             let xy = Math.abs(x / y);
             let yx = Math.abs(y / x);
-            if (Math.abs(x) > treshold || Math.abs(y) > treshold) {
+            if (Math.abs(x) > threshold || Math.abs(y) > threshold) {
                 if (yx <= limit) {
                     if (x < 0) {
                         setNextDirection(Direction.Left)
@@ -108,16 +106,16 @@ const Game: FC = () => {
             snakeService
                 .tick(nextDirection)
                 .then(meta => setTimeout(() => setGameMeta(meta), meta.nextTickIn))
-                .then(() => setTickInProgress(false))
                 .catch(() => {
                     setRunning(false)
                 })
+                .finally(() => setTickInProgress(false))
         }
     }, [gameMeta])
 
 
-    return <div id="game" className="space-y-4 max-w-[70vh] mx-auto">
-        <CardWithNavigation className="space-y-2">
+    return <div id="game" className="flex justify-evenly items-center mx-auto">
+        <CardWithNavigation className="space-y-2" heading={snakeService.getMap().name}>
             <div className="flex justify-between items-center">
                 <p className="text-slate-900 font-bold text-lg">Score: {snakeService.getScore()}</p>
                 {snakeService.hasError() && <p className="text-lg text-red-700">{snakeService.getErrorCause()}</p>}
@@ -126,7 +124,9 @@ const Game: FC = () => {
                 <Button onClick={() => restart()} disabled={running}>Restart (space)</Button>
             </div>
         </CardWithNavigation>
-        {gameMeta && <GameFieldPresenter gameMap={snakeService.getMap()} gameMeta={gameMeta}/>}
+        <div className="flex-none w-[75vh]">
+            {gameMeta && <GameFieldPresenter gameMap={snakeService.getMap()} gameMeta={gameMeta}/>}
+        </div>
     </div>
 }
 
